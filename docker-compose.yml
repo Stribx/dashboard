@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  frontend_qwik:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+
+  postgres_db:
+    image: postgres:15.3
+    container_name: postgres
+    environment:
+      POSTGRES_USER: dashboard
+      POSTGRES_PASSWORD: dashboard
+      POSTGRES_DB: dashboard
+    restart: always
+    volumes:
+      - ./postgres_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dashboard@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: dashboard
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+  
+  backend_rust:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    links:
+      - "postgres_db"
+    ports:
+      - "3000:3000"
